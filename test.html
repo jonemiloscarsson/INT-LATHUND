@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminalberäkning</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' stop-color='%231c2d58'/><stop offset='100%' stop-color='%2334518d'/></linearGradient></defs><rect width='100' height='100' rx='22' fill='url(%23bg)'/><text x='50' y='32' fill='%23ffffff' font-family='Arial, sans-serif' font-weight='900' font-style='italic' font-size='22' text-anchor='middle'>INT</text><rect x='28' y='42' width='44' height='42' rx='6' fill='none' stroke='%23ffffff' stroke-width='3'/><line x1='34' y1='50' x2='66' y2='50' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round'/><circle cx='37' cy='60' r='3' fill='%23ffffff'/><circle cx='50' cy='60' r='3' fill='%23ffffff'/><circle cx='63' cy='60' r='3' fill='%23ffffff'/><circle cx='37' cy='72' r='3' fill='%23ffffff'/><circle cx='50' cy='72' r='3' fill='%23ffffff'/><rect x='60' y='69' width='6' height='6' rx='1' fill='%2338bdf8'/></svg>">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-title: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --accent-blue: #2563eb;
+            --total-bg: #f1f5f9;
+            
+            --wfs-exp-color: #2563eb;
+            --cc-exp-color: #ea580c;
+            --gla-exp-color: #0284c7;
+            --wfs-imp-color: #16a34a;
+            --cc-imp-color: #9333ea;
+            --gla-imp-color: #0d9488;
+            --mmx-menzies-color: #dc2626;
+            --mmx-mft-color: #7c3aed;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #2c2d30;
+            --card-bg: #383a3e;
+            --text-main: #e2e8f0;
+            --text-title: #ffffff;
+            --text-muted: #94a3b8;
+            --border-color: #4a4d52;
+            --accent-blue: #3b82f6;
+            --total-bg: #2f3034;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 25px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            transition: background-color 0.2s, color 0.2s;
+            font-weight: 400;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-int {
+            width: 70px;
+            height: 45px;
+            background: linear-gradient(135deg, #1c2d58 0%, #34518d 100%);
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-style: italic;
+            font-size: 1.3rem;
+            letter-spacing: -1px;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .year-badge-sub {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .main-menu-nav {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .menu-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-title);
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.15s ease;
+        }
+
+        .menu-btn:hover { background: var(--total-bg); }
+
+        .menu-btn.active {
+            background: #1c2d58;
+            color: #ffffff;
+            border-color: #101c38;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            transition: all 0.15s ease;
+        }
+        .theme-toggle:hover { 
+            background-color: var(--total-bg);
+            transform: translateY(-1px);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .tab-content {
+            display: block;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .inputs-main {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .input-group label { font-weight: 500; font-size: 0.95rem; color: var(--text-title); }
+        
+        input[type="number"], input[type="password"], input[type="text"], input[type="date"], select {
+            padding: 7px 10px;
+            font-size: 0.95rem;
+            font-weight: 400;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-main);
+        }
+        input[type="number"] { width: 90px; text-align: center; }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .checkbox-inline {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .date-picker-inline {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: var(--total-bg);
+            padding: 4px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+        }
+
+        .filter-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 0px rgba(0, 0, 0, 0.08);
+            transition: all 0.15s ease-in-out;
+            position: relative;
+            top: 0;
+            user-select: none;
+        }
+
+        .filter-btn:hover {
+            background: var(--total-bg);
+            border-color: #94a3b8;
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: #1c2d58;
+            color: #ffffff;
+            border-color: #101c38;
+            font-weight: 600;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 0 1px #1c2d58;
+            transform: translateY(1px);
+        }
+
+        .sort-btn {
+            background: #64748b;
+            color: #ffffff;
+            border: 1px solid #475569;
+            padding: 8px 16px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            box-shadow: 0 2px 0px rgba(0,0,0,0.1);
+            transition: all 0.15s ease-in-out;
+            align-self: flex-start;
+            user-select: none;
+        }
+
+        .sort-btn:hover { background: #475569; transform: translateY(-1px); }
+
+        .sort-btn.active-sort {
+            background: #1c2d58;
+            color: #ffffff;
+            border-color: #101c38;
+            font-weight: 700;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+            transform: translateY(1px);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin-bottom: 40px;
+        }
+        @media (max-width: 900px) {
+            .grid-container { grid-template-columns: 1fr; }
+        }
+
+        .terminal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        }
+        
+        .terminal-box.wfs-exp { border-top: 5px solid var(--wfs-exp-color); }
+        .terminal-box.cc-exp  { border-top: 5px solid var(--cc-exp-color); }
+        .terminal-box.gla-exp { border-top: 5px solid var(--gla-exp-color); }
+        .terminal-box.wfs-imp { border-top: 5px solid var(--wfs-imp-color); }
+        .terminal-box.cc-imp  { border-top: 5px solid var(--cc-imp-color); }
+        .terminal-box.gla-imp { border-top: 5px solid var(--gla-imp-color); }
+        .terminal-box.mmx-menzies-exp, .terminal-box.mmx-menzies-imp { border-top: 5px solid var(--mmx-menzies-color); }
+        .terminal-box.mmx-mft-exp, .terminal-box.mmx-mft-imp { border-top: 5px solid var(--mmx-mft-color); }
+
+        .logo-header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px 0 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .terminal-logo-text {
+            font-size: 1.7rem;
+            font-weight: 700;
+            font-style: italic;
+            letter-spacing: -0.5px;
+            filter: grayscale(100%);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        th, td {
+            padding: 8px 0;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+            font-weight: 400;
+        }
+        th { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 500; }
+        
+        .sub-text {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-style: italic;
+            font-weight: 400;
+        }
+
+        .total-row {
+            background-color: var(--total-bg);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .total-row td {
+            border-top: 1px solid var(--border-color);
+            border-bottom: none;
+            padding: 12px 10px;
+        }
+
+        details {
+            margin-top: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-weight: 400;
+        }
+        summary { font-weight: 500; cursor: pointer; color: var(--text-title); user-select: none; }
+        
+        .settings-tax-year {
+            margin-top: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pwd-change-box {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .pwd-change-box label { font-size: 0.85rem; color: var(--text-title); }
+        
+        .action-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-main);
+        }
+        .action-btn:hover { background: var(--total-bg); }
+
+        .price-section-title {
+            grid-column: 1 / -1;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--accent-blue);
+            margin-top: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 4px;
+        }
+
+        .price-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .price-field { display: flex; flex-direction: column; }
+        .price-field label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 400; }
+
+        /* Kunduträkning Storage Box */
+        .customer-storage-box {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 600px;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .customer-storage-box h2 {
+            margin-top: 0;
+            color: var(--text-title);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1rem;
+        }
+        .result-row.total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            border-bottom: none;
+            padding-top: 15px;
+        }
+
+        /* Tullfrakt Styling */
+        .tullfrakt-box {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 25px;
+            max-width: 650px;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .tullfrakt-box h2 {
+            margin-top: 0;
+            color: var(--text-title);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            font-size: 1.3rem;
+        }
+        .currency-card {
+            background: var(--total-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .currency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .currency-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--text-title);
+        }
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .status-badge.success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+        .status-badge.error {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .currency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+        .currency-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .currency-item label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .currency-item input {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .currency-rate-highlight {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+        
+        .tf-section-title {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-title);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="header-left">
+            <div class="logo-container">
+                <div class="logo-int">INT</div>
+                <div class="year-badge-sub" id="headerYearBadge">Taxa 2026</div>
+            </div>
+            <div class="main-menu-nav">
+                <button class="menu-btn active" id="tabBtnTerminal" onclick="switchTab('terminal')">Terminalberäkning</button>
+                <button class="menu-btn" id="tabBtnStorage" onclick="switchTab('storage')">Storage Fee</button>
+                <button class="menu-btn" id="tabBtnInsurance" onclick="switchTab('insurance')">Insurance</button>
+                <button class="menu-btn" id="tabBtnTullfrakt" onclick="switchTab('tullfrakt')">Tullfrakt</button>
+            </div>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
+            🌙 Dark
+        </button>
+    </div>
+
+    <!-- FLIK 1: TERMINALBERÄKNING -->
+    <div id="tabTerminal" class="tab-content">
+        <div class="card">
+            <div class="controls-row">
+                <div class="inputs-main">
+                    <div class="input-group">
+                        <label for="weight">Vikt (kg):</label>
+                        <input type="number" id="weight" value="100" oninput="syncInputs('weight')">
+                    </div>
+                    <div class="input-group">
+                        <label for="pieces">Antal (pcs):</label>
+                        <input type="number" id="pieces" value="1" oninput="syncInputs('pieces')">
+                    </div>
+
+                    <div class="input-group" style="border-left: 1px solid var(--border-color); padding-left: 12px;">
+                        <label for="un_count">Antal UN-nr:</label>
+                        <input type="number" id="un_count" value="1" min="1" oninput="calculateAll()">
+                    </div>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="global_dry_ice" onchange="calculateAll()">
+                        Dry Ice / ELI / Batteri
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="global_dg_check" onchange="calculateAll()">
+                        DG Check
+                    </label>
+
+                    <label class="checkbox-inline">
+                        <input type="checkbox" id="global_storage_fee" onchange="toggleStorageDates(); calculateAll();">
+                        Storage Fee
+                    </label>
+
+                    <div class="date-picker-inline" id="storage_dates_wrapper">
+                        <label for="storage_from">Från:</label>
+                        <input type="date" id="storage_from" onchange="syncInputs('storage_from')">
+                        <label for="storage_to">Till:</label>
+                        <input type="date" id="storage_to" onchange="syncInputs('storage_to')">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" onclick="setQuickFilter('all', 'all', this)">Visa Alla</button>
+                        <button class="filter-btn" onclick="setQuickFilter('ARN', 'export', this)">Export ARN</button>
+                        <button class="filter-btn" onclick="setQuickFilter('ARN', 'import', this)">Import ARN</button>
+                        <button class="filter-btn" onclick="setQuickFilter('MMX', 'export', this)">Export MMX</button>
+                        <button class="filter-btn" onclick="setQuickFilter('MMX', 'import', this)">Import MMX</button>
+                        <button class="filter-btn" onclick="setQuickFilter('GOT', 'export', this)">Export GOT</button>
+                        <button class="filter-btn" onclick="setQuickFilter('GOT', 'import', this)">Import GOT</button>
+                    </div>
+
+                    <div style="margin-top: 10px;">
+                        <button class="sort-btn" id="sortCheapestBtn" onclick="toggleSortByCheapest()">
+                            Sortera lägsta pris först
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid-container" id="gridContainer">
+
+            <!-- 1. WFS EXPORT (ARN) -->
+            <div class="terminal-box wfs-exp" data-airport="ARN" data-type="export" id="box_wfs_exp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">wfs</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (WFS Export - ARN)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>THC <span class="sub-text">Handling, sorting, labeling and neutralization</span></td>
+                                <td style="text-align: right;" id="wfs_exp_thc">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Handling <span class="sub-text">Acceptance of Cargo ready for Carriage</span></td>
+                                <td style="text-align: right;" id="wfs_exp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_wfs_exp_screening">
+                                <td>Screening <span class="sub-text" id="wfs_exp_screening_sub">Per 10 pcs</span></td>
+                                <td style="text-align: right;" id="wfs_exp_screening">0 SEK</td>
+                            </tr>
+                            <tr id="row_wfs_exp_battery" style="display: none;">
+                                <td>Batteri / Dry Ice / ICE / REQ / RRE <span class="sub-text">DGR not requiring shippers declaration incl 20 pcs</span></td>
+                                <td style="text-align: right;" id="wfs_exp_battery">0 SEK</td>
+                            </tr>
+                            <tr id="row_wfs_exp_dg" style="display: none;">
+                                <td>DG Check Export <span class="sub-text" id="wfs_exp_dg_sub">Incl. 20 pcs (all UN no.)</span></td>
+                                <td style="text-align: right;" id="wfs_exp_dg">0 SEK</td>
+                            </tr>
+                            <tr id="row_wfs_exp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="wfs_exp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="wfs_exp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="wfs_exp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 2. WFS IMPORT (ARN) -->
+            <div class="terminal-box wfs-imp" data-airport="ARN" data-type="import" id="box_wfs_imp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">wfs</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (WFS Import - ARN)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Import Handling <span class="sub-text">1.83 SEK/kg (Min 183 SEK, Max 3 150 SEK)</span></td>
+                                <td style="text-align: right;" id="wfs_imp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_wfs_imp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="wfs_imp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="wfs_imp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="wfs_imp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 3. CARGO CENTER EXPORT (ARN) -->
+            <div class="terminal-box cc-exp" data-airport="ARN" data-type="export" id="box_cc_exp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">CARGO CENTER</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (Cargo Center Export - ARN)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hanteringsavgift <span class="sub-text">Mottagning, sortering och märkning</span></td>
+                                <td style="text-align: right;" id="cc_exp_handling">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Terminalavgift <span class="sub-text">Per påbörjat 100-tal kg</span></td>
+                                <td style="text-align: right;" id="cc_exp_terminal">0 SEK</td>
+                            </tr>
+                            <tr id="row_cc_exp_screening">
+                                <td>Screening <span class="sub-text" id="cc_exp_screening_sub">Per 10 pcs</span></td>
+                                <td style="text-align: right;" id="cc_exp_screening">0 SEK</td>
+                            </tr>
+                            <tr id="row_cc_exp_dryice" style="display: none;">
+                                <td>Dry Ice / ELI / ELM <span class="sub-text" id="cc_exp_dryice_sub">Inkl 5 kollin</span></td>
+                                <td style="text-align: right;" id="cc_exp_dryice">0 SEK</td>
+                            </tr>
+                            <tr id="row_cc_exp_dg" style="display: none;">
+                                <td>DGR Check Export <span class="sub-text" id="cc_exp_dg_sub">Per check</span></td>
+                                <td style="text-align: right;" id="cc_exp_dg">0 SEK</td>
+                            </tr>
+                            <tr id="row_cc_exp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="cc_exp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="cc_exp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="cc_exp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 4. CARGO CENTER IMPORT (ARN) -->
+            <div class="terminal-box cc-imp" data-airport="ARN" data-type="import" id="box_cc_imp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">CARGO CENTER</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (Cargo Center Import - ARN)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Terminalavgift <span class="sub-text">1.25 SEK/kg (Min 125 SEK, Max 11 250 SEK)</span></td>
+                                <td style="text-align: right;" id="cc_imp_terminal">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Hanteringsavgift <span class="sub-text">0.64 SEK/kg (Min 125 SEK)</span></td>
+                                <td style="text-align: right;" id="cc_imp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_cc_imp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="cc_imp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="cc_imp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="cc_imp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 5. GLA EXPORT (GOT) -->
+            <div class="terminal-box gla-exp" data-airport="GOT" data-type="export" id="box_gla_exp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">gla</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (GLA Export - GOT)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hanteringsavgift <span class="sub-text">Mottagning & sortering</span></td>
+                                <td style="text-align: right;" id="gla_exp_handling">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Terminalavgift <span class="sub-text">THC / Terminal hantering</span></td>
+                                <td style="text-align: right;" id="gla_exp_terminal">0 SEK</td>
+                            </tr>
+                            <tr id="row_gla_exp_screening">
+                                <td>Screening <span class="sub-text" id="gla_exp_screening_sub">Per 10 pcs</span></td>
+                                <td style="text-align: right;" id="gla_exp_screening">0 SEK</td>
+                            </tr>
+                            <tr id="row_gla_exp_battery" style="display: none;">
+                                <td>ICE / REQ / ELI / Batteri <span class="sub-text">Undantaget DGR / Torris</span></td>
+                                <td style="text-align: right;" id="gla_exp_battery">0 SEK</td>
+                            </tr>
+                            <tr id="row_gla_exp_dg" style="display: none;">
+                                <td>GLA DG Check Export <span class="sub-text" id="gla_exp_dg_sub">Upp till 20 kollin</span></td>
+                                <td style="text-align: right;" id="gla_exp_dg">0 SEK</td>
+                            </tr>
+                            <tr id="row_gla_exp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="gla_exp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="gla_exp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="gla_exp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 6. GLA IMPORT (GOT) -->
+            <div class="terminal-box gla-imp" data-airport="GOT" data-type="import" id="box_gla_imp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">gla</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (GLA Import - GOT)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Terminalavgift <span class="sub-text">1.30 SEK/kg (Min 130 SEK, Max 11 500 SEK)</span></td>
+                                <td style="text-align: right;" id="gla_imp_terminal">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Importhantering <span class="sub-text">0.65 SEK/kg (Min 130 SEK)</span></td>
+                                <td style="text-align: right;" id="gla_imp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_gla_imp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="gla_imp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="gla_imp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="gla_imp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 7. MENZIES EXPORT (MMX) -->
+            <div class="terminal-box mmx-menzies-exp" data-airport="MMX" data-type="export" id="box_menzies_exp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">MENZIES</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (Menzies Export - MMX)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Terminalhantering <span class="sub-text">Inkl. Komplettering av dokument, godsmärkning upp till 10 kolli.</span></td>
+                                <td style="text-align: right;" id="menzies_exp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_menzies_exp_screening">
+                                <td>Screening <span class="sub-text" id="menzies_exp_screening_sub">per tiotal, maxvikt 3000kg</span></td>
+                                <td style="text-align: right;" id="menzies_exp_screening">0 SEK</td>
+                            </tr>
+                            <tr id="row_menzies_exp_dryice" style="display: none;">
+                                <td>ICE / ELI Check <span class="sub-text">Standardkontroll</span></td>
+                                <td style="text-align: right;" id="menzies_exp_dryice">0 SEK</td>
+                            </tr>
+                            <tr id="row_menzies_exp_dg" style="display: none;">
+                                <td>Export DG Check <span class="sub-text" id="menzies_exp_dg_sub">Bas per UN-nr & kollin</span></td>
+                                <td style="text-align: right;" id="menzies_exp_dg">0 SEK</td>
+                            </tr>
+                            <tr id="row_menzies_exp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="menzies_exp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="menzies_exp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="menzies_exp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 8. MENZIES IMPORT (MMX) -->
+            <div class="terminal-box mmx-menzies-imp" data-airport="MMX" data-type="import" id="box_menzies_imp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">MENZIES</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (Menzies Import - MMX)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hantering <span class="sub-text">0.55 SEK/kg (Min 55 SEK)</span></td>
+                                <td style="text-align: right;" id="menzies_imp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_menzies_imp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="menzies_imp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="menzies_imp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="menzies_imp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 9. MFT EXPORT (MMX) -->
+            <div class="terminal-box mmx-mft-exp" data-airport="MMX" data-type="export" id="box_mft_exp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">MFT</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (MFT Export - MMX)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Hantering <span class="sub-text" id="mft_exp_hnd_sub">Trappstegsmodell baserad på vikt</span></td>
+                                <td style="text-align: right;" id="mft_exp_handling">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Utlastningsavgift <span class="sub-text">0.59 SEK/kg (Min 59 SEK)</span></td>
+                                <td style="text-align: right;" id="mft_exp_utlast">0 SEK</td>
+                            </tr>
+                            <tr id="row_mft_exp_screening">
+                                <td>Screening <span class="sub-text" id="mft_exp_screening_sub">per HAWB, 1 -15 kollin, max 140*175 cm</span></td>
+                                <td style="text-align: right;" id="mft_exp_screening">0 SEK</td>
+                            </tr>
+                            <tr id="row_mft_exp_dryice" style="display: none;">
+                                <td>Kontroll av ICE, ELI, ELM, RRE & REQ <span class="sub-text">Fast avgift</span></td>
+                                <td style="text-align: right;" id="mft_exp_dryice">0 SEK</td>
+                            </tr>
+                            <tr id="row_mft_exp_dg" style="display: none;">
+                                <td>MFT DG Check Export <span class="sub-text" id="mft_exp_dg_sub">Upp till 20 kollin</span></td>
+                                <td style="text-align: right;" id="mft_exp_dg">0 SEK</td>
+                            </tr>
+                            <tr id="row_mft_exp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="mft_exp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="mft_exp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="mft_exp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 10. MFT IMPORT (MMX) -->
+            <div class="terminal-box mmx-mft-imp" data-airport="MMX" data-type="import" id="box_mft_imp">
+                <div>
+                    <div class="logo-header">
+                        <span class="terminal-logo-text">MFT</span>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Avgift (MFT Import - MMX)</th>
+                                <th style="text-align: right;">SEK</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Terminalavgift <span class="sub-text" id="mft_imp_term_sub">Per påbörjat 100-tal kg</span></td>
+                                <td style="text-align: right;" id="mft_imp_terminal">0 SEK</td>
+                            </tr>
+                            <tr>
+                                <td>Importhantering <span class="sub-text">0.63 SEK/kg (Min 63 SEK)</span></td>
+                                <td style="text-align: right;" id="mft_imp_handling">0 SEK</td>
+                            </tr>
+                            <tr id="row_mft_imp_storage" style="display: none;">
+                                <td>Storage Fee <span class="sub-text" id="mft_imp_storage_sub">0 dagar</span></td>
+                                <td style="text-align: right;" id="mft_imp_storage">0 SEK</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <table>
+                    <tbody>
+                        <tr class="total-row">
+                            <td>TOTAL KOSTNAD:</td>
+                            <td style="text-align: right;" id="mft_imp_total">0 SEK</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FLIK 2: STORAGE FEE (MOT KUND) -->
+    <div id="tabStorage" class="tab-content" style="display: none;">
+        <div class="customer-storage-box">
+            <h2>Beräkning Storage Fee (Mot kund)</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                Taxa mot kund: <strong>120:- / 100 kg / dag</strong> (Samma vikt, antal och datum som skickas från huvudmenyn).
+            </p>
+            
+            <div class="result-row">
+                <span>Vikt / Beräknat 100-tal kg:</span>
+                <strong id="cust_weight_display">100 kg (1 x 100 kg)</strong>
+            </div>
+            <div class="result-row">
+                <span>Antal dagar valda:</span>
+                <strong id="cust_days_display">0 dagar</strong>
+            </div>
+            <div class="result-row">
+                <span>Axe / Taxa per dag:</span>
+                <strong>120 SEK / 100 kg</strong>
+            </div>
+            <div class="result-row total">
+                <span>TOTAL STORAGE MOT KUND:</span>
+                <span id="cust_total_display">0,00 SEK</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLIK 3: INSURANCE (DUMMY) -->
+    <div id="tabInsurance" class="tab-content" style="display: none;">
+        <div class="card">
+            <h2>Insurance</h2>
+            <p>Försäkringsberäkningar och information kommer att visas här.</p>
+        </div>
+    </div>
+
+    <!-- FLIK 4: TULLFRAKT -->
+    <div id="tabTullfrakt" class="tab-content" style="display: none;">
+        <div class="tullfrakt-box">
+            <h2>Tullfrakt - Beräkning</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">
+                Ange kostnader i USD för lokala avgifter samt flygfrakt för att beräkna totalsummor i SEK.
+            </p>
+
+            <div class="currency-card">
+                <div class="currency-header">
+                    <h3>USD / SEK (Inkl. Påslag)</h3>
+                    <span id="usd_fetch_status" class="status-badge">Hämtar kurs...</span>
+                </div>
+
+                <div class="currency-grid">
+                    <div class="currency-item">
+                        <label>Grundkurs (Frankfurter):</label>
+                        <input type="number" step="0.0001" id="usd_base_rate" value="0.0000" oninput="recalculateUsdWithMargin()">
+                    </div>
+                    <div class="currency-item">
+                        <label>Påslag (%):</label>
+                        <input type="number" step="0.1" id="usd_margin_percent" value="5" oninput="recalculateUsdWithMargin()">
+                    </div>
+                    <div class="currency-item" style="grid-column: 1 / -1; margin-top: 5px;">
+                        <label>Tillämpad USD-kurs:</label>
+                        <div id="usd_final_rate_display" class="currency-rate-highlight">0.0000 SEK</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tf-section-title">Inmatning av kostnader (USD)</div>
+
+            <div class="currency-grid" style="margin-top: 15px;">
+                <div class="currency-item">
+                    <label for="tf_local_usd">Lokala kostnader dest/origin (USD):</label>
+                    <input type="number" step="0.01" id="tf_local_usd" value="0" oninput="calculateTullfrakt()">
+                </div>
+                <div class="currency-item">
+                    <label for="tf_freight_usd">Flygfrakt (USD):</label>
+                    <input type="number" step="0.01" id="tf_freight_usd" value="0" oninput="calculateTullfrakt()">
+                </div>
+            </div>
+
+            <div class="tf-section-title">Sammanställning (SEK)</div>
+
+            <div class="result-row">
+                <span>Lokala kostnader dest/origin:</span>
+                <strong id="tf_local_sek_display">0,00 SEK</strong>
+            </div>
+            <div class="result-row">
+                <span>Flygfrakt:</span>
+                <strong id="tf_freight_sek_display">0,00 SEK</strong>
+            </div>
+            <div class="result-row total">
+                <span>TOTAL SUMMA TULLFRAKT:</span>
+                <span id="tf_total_sek_display">0,00 SEK</span>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; align-items: center;">
+                <button class="action-btn" onclick="fetchUsdExchangeRate()">🔄 Uppdatera valutakurs</button>
+                <span id="usd_last_updated" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- INSTÄLLNINGAR MED LÖSENORDSSKYDD -->
+    <details id="settingsDetails">
+        <summary onclick="checkPassword(event)">🔒 ⚙️ Ändra Grundpriser & Taxor</summary>
+        
+        <div class="settings-tax-year">
+            <label for="taxYearSelect" style="font-weight: 500;">Gällande taxeår:</label>
+            <select id="taxYearSelect" onchange="updateTaxYear()">
+                <option value="2026" selected>2026 års taxor</option>
+                <option value="2027">2027 års taxor</option>
+            </select>
+        </div>
+
+        <div class="price-inputs">
+            <!-- WFS ARN -->
+            <div class="price-section-title">WFS Export (ARN)</div>
+            <div class="price-field"><label>WFS Exp THC (kr/kg):</label><input type="number" step="0.01" id="cfg_wfs_exp_thc_kg" value="0.68" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Exp THC Min (kr):</label><input type="number" id="cfg_wfs_exp_thc_min" value="68" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Exp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_wfs_exp_hnd_kg" value="0.42" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Exp Handling Min (kr):</label><input type="number" id="cfg_wfs_exp_hnd_min" value="42" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Exp Screening (/10pcs):</label><input type="number" id="cfg_wfs_exp_scr_unit" value="475" oninput="calculateAll()"></div>
+
+            <!-- CC ARN -->
+            <div class="price-section-title">Cargo Center Export (ARN)</div>
+            <div class="price-field"><label>CC Exp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_cc_exp_hnd_kg" value="0.72" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Exp Handling Min (kr):</label><input type="number" id="cfg_cc_exp_hnd_min" value="72" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Exp Terminal (/100kg):</label><input type="number" id="cfg_cc_exp_term_unit" value="43" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Exp Terminal Min (kr):</label><input type="number" id="cfg_cc_exp_term_min" value="172" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Exp Screening (/10pcs):</label><input type="number" id="cfg_cc_exp_scr_unit" value="463" oninput="calculateAll()"></div>
+
+            <!-- GLA GOT -->
+            <div class="price-section-title">GLA Export & Import (GOT)</div>
+            <div class="price-field"><label>GLA Exp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_gla_exp_hnd_kg" value="0.45" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Exp Handling Min (kr):</label><input type="number" id="cfg_gla_exp_hnd_min" value="50" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Exp Terminal (kr/kg):</label><input type="number" step="0.01" id="cfg_gla_exp_term_kg" value="0.70" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Exp Terminal Min (kr):</label><input type="number" id="cfg_gla_exp_term_min" value="70" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Exp Screening (/10pcs):</label><input type="number" id="cfg_gla_exp_scr_unit" value="480" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Exp ICE/ELI/Req (kr):</label><input type="number" id="cfg_gla_exp_battery" value="495" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Imp Terminal (kr/kg):</label><input type="number" step="0.01" id="cfg_gla_imp_term_kg" value="1.30" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Imp Terminal Min (kr):</label><input type="number" id="cfg_gla_imp_term_min" value="130" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Imp Terminal Max (kr):</label><input type="number" id="cfg_gla_imp_term_max" value="11500" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Imp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_gla_imp_hnd_kg" value="0.65" oninput="calculateAll()"></div>
+            <div class="price-field"><label>GLA Imp Handling Min (kr):</label><input type="number" id="cfg_gla_imp_hnd_min" value="130" oninput="calculateAll()"></div>
+
+            <!-- WFS IMPORT -->
+            <div class="price-section-title">WFS Import (ARN)</div>
+            <div class="price-field"><label>WFS Imp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_wfs_imp_hnd_kg" value="1.83" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Imp Handling Min (kr):</label><input type="number" id="cfg_wfs_imp_hnd_min" value="183" oninput="calculateAll()"></div>
+            <div class="price-field"><label>WFS Imp Handling Max (kr):</label><input type="number" id="cfg_wfs_imp_hnd_max" value="3150" oninput="calculateAll()"></div>
+
+            <!-- CC IMPORT -->
+            <div class="price-section-title">Cargo Center Import (ARN)</div>
+            <div class="price-field"><label>CC Imp Terminal (kr/kg):</label><input type="number" step="0.01" id="cfg_cc_imp_term_kg" value="1.25" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Imp Terminal Min (kr):</label><input type="number" id="cfg_cc_imp_term_min" value="125" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Imp Terminal Max (kr):</label><input type="number" id="cfg_cc_imp_term_max" value="11250" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Imp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_cc_imp_hnd_kg" value="0.64" oninput="calculateAll()"></div>
+            <div class="price-field"><label>CC Imp Handling Min (kr):</label><input type="number" id="cfg_cc_imp_hnd_min" value="125" oninput="calculateAll()"></div>
+
+            <!-- MENZIES MMX -->
+            <div class="price-section-title">Menzies Export & Import (MMX)</div>
+            <div class="price-field"><label>Menzies Exp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_menzies_exp_hnd_kg" value="0.48" oninput="calculateAll()"></div>
+            <div class="price-field"><label>Menzies Exp Handling Min (kr):</label><input type="number" id="cfg_menzies_exp_hnd_min" value="55" oninput="calculateAll()"></div>
+            <div class="price-field"><label>Menzies Exp Screening (/10pcs):</label><input type="number" id="cfg_menzies_exp_scr_unit" value="600" oninput="calculateAll()"></div>
+            <div class="price-field"><label>Menzies Exp Dry Ice/ELI (kr):</label><input type="number" id="cfg_menzies_exp_dryice" value="200" oninput="calculateAll()"></div>
+            <div class="price-field"><label>Menzies Imp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_menzies_imp_hnd_kg" value="0.55" oninput="calculateAll()"></div>
+            <div class="price-field"><label>Menzies Imp Handling Min (kr):</label><input type="number" id="cfg_menzies_imp_hnd_min" value="55" oninput="calculateAll()"></div>
+
+            <!-- MFT MMX -->
+            <div class="price-section-title">MFT Export & Import (MMX)</div>
+            <div class="price-field"><label>MFT Exp Utlastning (kr/kg):</label><input type="number" step="0.01" id="cfg_mft_exp_utlast_kg" value="0.59" oninput="calculateAll()"></div>
+            <div class="price-field"><label>MFT Exp Utlastning Min (kr):</label><input type="number" id="cfg_mft_exp_utlast_min" value="59" oninput="calculateAll()"></div>
+            <div class="price-field"><label>MFT Exp Screening Base (1-15pcs):</label><input type="number" id="cfg_mft_exp_scr_base" value="470" oninput="calculateAll()"></div>
+            <div class="price-field"><label>MFT Exp Screening Extra (/15pcs):</label><input type="number" id="cfg_mft_exp_scr_extra" value="390" oninput="calculateAll()"></div>
+            <div class="price-field"><label>MFT Imp Handling (kr/kg):</label><input type="number" step="0.01" id="cfg_mft_imp_hnd_kg" value="0.63" oninput="calculateAll()"></div>
+            <div class="price-field"><label>MFT Imp Handling Min (kr):</label><input type="number" id="cfg_mft_imp_hnd_min" value="63" oninput="calculateAll()"></div>
+        </div>
+
+        <div class="pwd-change-box">
+            <label for="newPwdInput">Byt lösenord:</label>
+            <input type="password" id="newPwdInput" placeholder="Nytt lösenord">
+            <button class="action-btn" onclick="changePassword()">Spara nytt lösenord</button>
+        </div>
+    </details>
+
+    <script>
+        let currentPassword = localStorage.getItem('terminal_calculator_pwd') || "1234";
+        let isUnlocked = false;
+
+        let currentAirportFilter = 'all';
+        let currentTypeFilter = 'all';
+        let savedAirportFilter = 'all';
+        let savedTypeFilter = 'all';
+        let savedActiveBtn = null;
+        let isSortedByCheapest = false;
+
+        let calculatedTotals = {};
+
+        const defaultOrderIds = [
+            'box_wfs_exp', 'box_wfs_imp',
+            'box_cc_exp', 'box_cc_imp',
+            'box_gla_exp', 'box_gla_imp',
+            'box_menzies_exp', 'box_menzies_imp',
+            'box_mft_exp', 'box_mft_imp'
+        ];
+
+        function switchTab(tab) {
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+
+            if (tab === 'terminal') {
+                document.getElementById('tabBtnTerminal').classList.add('active');
+                document.getElementById('tabTerminal').style.display = 'block';
+            } else if (tab === 'storage') {
+                document.getElementById('tabBtnStorage').classList.add('active');
+                document.getElementById('tabStorage').style.display = 'block';
+            } else if (tab === 'insurance') {
+                document.getElementById('tabBtnInsurance').classList.add('active');
+                document.getElementById('tabInsurance').style.display = 'block';
+            } else if (tab === 'tullfrakt') {
+                document.getElementById('tabBtnTullfrakt').classList.add('active');
+                document.getElementById('tabTullfrakt').style.display = 'block';
+            }
+        }
+
+        function fetchUsdExchangeRate() {
+            const statusBadge = document.getElementById('usd_fetch_status');
+            const lastUpdatedSpan = document.getElementById('usd_last_updated');
+            
+            statusBadge.innerText = "Hämtar...";
+            statusBadge.className = "status-badge";
+
+            fetch('https://api.frankfurter.dev/v1/latest?from=USD&to=SEK')
+                .then(response => {
+                    if (!response.ok) throw new Error("Kunde inte hämta valutakurs");
+                    return response.json();
+                })
+                .then(data => {
+                    if (data && data.rates && data.rates.SEK) {
+                        const baseRate = data.rates.SEK;
+                        document.getElementById('usd_base_rate').value = baseRate.toFixed(4);
+                        recalculateUsdWithMargin();
+                        
+                        statusBadge.innerText = "Uppdaterad";
+                        statusBadge.className = "status-badge success";
+                        
+                        const now = new Date();
+                        lastUpdatedSpan.innerText = `Senast hämtad: ${now.toLocaleTimeString('sv-SE')}`;
+                    } else {
+                        throw new Error("Svar saknar valutadata");
+                    }
+                })
+                .catch(err => {
+                    statusBadge.innerText = "Fel vid hämtning";
+                    statusBadge.className = "status-badge error";
+                    console.error("Valutafel:", err);
+                });
+        }
+
+        function getCalculatedUsdRate() {
+            const baseRate = parseFloat(document.getElementById('usd_base_rate').value) || 0;
+            const marginPercent = parseFloat(document.getElementById('usd_margin_percent').value) || 0;
+            return baseRate * (1 + (marginPercent / 100));
+        }
+
+        function recalculateUsdWithMargin() {
+            const finalRate = getCalculatedUsdRate();
+            document.getElementById('usd_final_rate_display').innerText = `${finalRate.toFixed(4)} SEK`;
+            calculateTullfrakt();
+        }
+
+        function calculateTullfrakt() {
+            const rate = getCalculatedUsdRate();
+            const localUsd = parseFloat(document.getElementById('tf_local_usd').value) || 0;
+            const freightUsd = parseFloat(document.getElementById('tf_freight_usd').value) || 0;
+
+            const localSek = localUsd * rate;
+            const freightSek = freightUsd * rate;
+            const totalSek = localSek + freightSek;
+
+            document.getElementById('tf_local_sek_display').innerText = localSek.toFixed(2) + ' SEK';
+            document.getElementById('tf_freight_sek_display').innerText = freightSek.toFixed(2) + ' SEK';
+            document.getElementById('tf_total_sek_display').innerText = totalSek.toFixed(2) + ' SEK';
+        }
+
+        function syncInputs(changedField) {
+            calculateAll();
+        }
+
+        function checkPassword(event) {
+            const details = document.getElementById('settingsDetails');
+            if (details.open || isUnlocked) return;
+            event.preventDefault();
+
+            const input = prompt("Mata in lösenord för att ändra grundpriser:");
+            if (input === currentPassword) {
+                isUnlocked = true;
+                details.open = true;
+            } else if (input !== null) {
+                alert("Felaktigt lösenord!");
+            }
+        }
+
+        function changePassword() {
+            const newPwd = document.getElementById('newPwdInput').value.trim();
+            if (newPwd.length < 3) {
+                alert("Lösenordet måste vara minst 3 tecken långt.");
+                return;
+            }
+            currentPassword = newPwd;
+            localStorage.setItem('terminal_calculator_pwd', newPwd);
+            document.getElementById('newPwdInput').value = '';
+            alert("Lösenordet har uppdaterats!");
+        }
+
+        function updateTaxYear() {
+            const year = document.getElementById('taxYearSelect').value;
+            document.getElementById('headerYearBadge').innerText = `Taxa ${year}`;
+            calculateAll();
+        }
+
+        function initTheme() {
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            setTheme(systemPrefersDark ? 'dark' : 'light');
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const btn = document.getElementById('themeBtn');
+            btn.innerHTML = theme === 'dark' ? '☀ Light' : '🌙 Dark';
+        }
+
+        function toggleStorageDates() {
+            const isChecked = document.getElementById('global_storage_fee').checked;
+            document.getElementById('storage_dates_wrapper').style.display = isChecked ? 'inline-flex' : 'none';
+        }
+
+        function calculateWfsStorageDays(type) {
+            const fromVal = document.getElementById('storage_from').value;
+            const toVal = document.getElementById('storage_to').value;
+            if (!fromVal || !toVal) return 0;
+
+            let d1 = new Date(fromVal);
+            let d2 = new Date(toVal);
+
+            if (d2 < d1) return 0;
+
+            if (type === 'import' && d1.getDay() === 0) {
+                d1.setDate(d1.getDate() + 1);
+            }
+
+            const diffTime = d2 - d1;
+            const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            const billableDays = Math.max(0, totalDays - 3);
+            return billableDays;
+        }
+
+        function calculateDays() {
+            const fromVal = document.getElementById('storage_from').value;
+            const toVal = document.getElementById('storage_to').value;
+            if (!fromVal || !toVal) return 0;
+            
+            const d1 = new Date(fromVal);
+            const d2 = new Date(toVal);
+            const diffTime = d2 - d1;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 0 ? diffDays : 0;
+        }
+
+        function setQuickFilter(airport, type, btnElement) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if(btnElement) btnElement.classList.add('active');
+
+            currentAirportFilter = airport;
+            currentTypeFilter = type;
+
+            if (!isSortedByCheapest) {
+                savedAirportFilter = airport;
+                savedTypeFilter = type;
+                savedActiveBtn = btnElement;
+            } else {
+                isSortedByCheapest = false;
+                const sortBtn = document.getElementById('sortCheapestBtn');
+                sortBtn.classList.remove('active-sort');
+                savedAirportFilter = airport;
+                savedTypeFilter = type;
+                savedActiveBtn = btnElement;
+            }
+
+            applyFiltersAndSort();
+        }
+
+        function toggleSortByCheapest() {
+            isSortedByCheapest = !isSortedByCheapest;
+            const sortBtn = document.getElementById('sortCheapestBtn');
+
+            if (isSortedByCheapest) {
+                const activeBtn = document.querySelector('.filter-btn.active');
+                if (activeBtn) savedActiveBtn = activeBtn;
+                
+                sortBtn.classList.add('active-sort');
+                
+                currentAirportFilter = 'all';
+                currentTypeFilter = 'all';
+            } else {
+                sortBtn.classList.remove('active-sort');
+                
+                currentAirportFilter = savedAirportFilter;
+                currentTypeFilter = savedTypeFilter;
+                
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                if (savedActiveBtn) {
+                    savedActiveBtn.classList.add('active');
+                } else {
+                    document.querySelector('.filter-btn').classList.add('active');
+                }
+            }
+
+            applyFiltersAndSort();
+        }
+
+        function applyFiltersAndSort() {
+            const container = document.getElementById('gridContainer');
+            const allBoxes = Array.from(document.querySelectorAll('.terminal-box'));
+
+            if (!isSortedByCheapest) {
+                defaultOrderIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) container.appendChild(el);
+                });
+
+                allBoxes.forEach(box => {
+                    const boxAirport = box.getAttribute('data-airport');
+                    const boxType = box.getAttribute('data-type');
+
+                    const matchAirport = (currentAirportFilter === 'all' || boxAirport === currentAirportFilter);
+                    const matchType = (currentTypeFilter === 'all' || boxType === currentTypeFilter);
+
+                    if (matchAirport && matchType) {
+                        box.style.display = 'flex';
+                    } else {
+                        box.style.display = 'none';
+                    }
+                });
+                return;
+            }
+
+            const pairs = [
+                { exp: document.getElementById('box_wfs_exp'), imp: document.getElementById('box_wfs_imp'), keyExp: 'wfs_exp', keyImp: 'wfs_imp' },
+                { exp: document.getElementById('box_cc_exp'), imp: document.getElementById('box_cc_imp'), keyExp: 'cc_exp', keyImp: 'cc_imp' },
+                { exp: document.getElementById('box_gla_exp'), imp: document.getElementById('box_gla_imp'), keyExp: 'gla_exp', keyImp: 'gla_imp' },
+                { exp: document.getElementById('box_menzies_exp'), imp: document.getElementById('box_menzies_imp'), keyExp: 'menzies_exp', keyImp: 'menzies_imp' },
+                { exp: document.getElementById('box_mft_exp'), imp: document.getElementById('box_mft_imp'), keyExp: 'mft_exp', keyImp: 'mft_imp' }
+            ];
+
+            pairs.sort((a, b) => {
+                const totalA = (calculatedTotals[a.keyExp] || 0) + (calculatedTotals[a.keyImp] || 0);
+                const totalB = (calculatedTotals[b.keyExp] || 0) + (calculatedTotals[b.keyImp] || 0);
+                return totalA - totalB;
+            });
+
+            pairs.forEach(pair => {
+                pair.exp.style.display = 'flex';
+                pair.imp.style.display = 'flex';
+                container.appendChild(pair.exp);
+                container.appendChild(pair.imp);
+            });
+        }
+
+        function calculateAll() {
+            const weight = parseFloat(document.getElementById('weight').value) || 0;
+            const pieces = parseFloat(document.getElementById('pieces').value) || 0;
+            const unCount = Math.max(1, parseInt(document.getElementById('un_count').value) || 1);
+            
+            const isDryIceChecked = document.getElementById('global_dry_ice').checked;
+            const isDgChecked = document.getElementById('global_dg_check').checked;
+            const isStorageChecked = document.getElementById('global_storage_fee').checked;
+            const daysStored = calculateDays();
+
+            const weightUnits100 = Math.ceil(weight / 100);
+
+            // -------------------------------------------------------------
+            // CUST STORAGE (BERÄKNING MOT KUND: 120 kr/100kg/dag)
+            // -------------------------------------------------------------
+            const custTotal = weightUnits100 * daysStored * 120;
+            document.getElementById('cust_weight_display').innerText = `${weight} kg (${weightUnits100} x 100 kg)`;
+            document.getElementById('cust_days_display').innerText = `${daysStored} dagar`;
+            document.getElementById('cust_total_display').innerText = `${custTotal.toFixed(2)} SEK`;
+
+
+            // -------------------------------------------------------------
+            // 1. WFS EXPORT (ARN)
+            // -------------------------------------------------------------
+            const wfsThcKg = parseFloat(document.getElementById('cfg_wfs_exp_thc_kg').value) || 0;
+            const wfsThcMin = parseFloat(document.getElementById('cfg_wfs_exp_thc_min').value) || 0;
+            const wfsHndKg = parseFloat(document.getElementById('cfg_wfs_exp_hnd_kg').value) || 0;
+            const wfsHndMin = parseFloat(document.getElementById('cfg_wfs_exp_hnd_min').value) || 0;
+            const wfsScrUnit = parseFloat(document.getElementById('cfg_wfs_exp_scr_unit').value) || 0;
+
+            let wfsExpThc = weight > 0 ? Math.max(weight * wfsThcKg, wfsThcMin) : 0;
+            let wfsExpHnd = weight > 0 ? Math.max(weight * wfsHndKg, wfsHndMin) : 0;
+            
+            let wfsExpScr = 0;
+            if (pieces > 0) {
+                const units = Math.ceil(pieces / 10);
+                wfsExpScr = units * wfsScrUnit;
+                document.getElementById('wfs_exp_screening_sub').innerText = `${units} enhet(er) à 10 pcs (${wfsScrUnit} kr/st)`;
+            }
+
+            let wfsExpBat = isDryIceChecked ? 545 : 0;
+            document.getElementById('row_wfs_exp_battery').style.display = isDryIceChecked ? '' : 'none';
+
+            // WFS DG Check Export: 1750 incl 20 pcs + 70 kr/pc over 20
+            let wfsExpDg = 0;
+            if (isDgChecked) {
+                wfsExpDg = 1750;
+                if (pieces > 20) {
+                    wfsExpDg += (pieces - 20) * 70;
+                    document.getElementById('wfs_exp_dg_sub').innerText = `1750 kr (20 pcs) + ${pieces - 20} st x 70 kr`;
+                } else {
+                    document.getElementById('wfs_exp_dg_sub').innerText = `Incl. 20 pcs (all UN no.)`;
+                }
+            }
+            document.getElementById('row_wfs_exp_dg').style.display = isDgChecked ? '' : 'none';
+
+            let wfsExpBillableDays = calculateWfsStorageDays('export');
+            let wfsExpStorage = isStorageChecked ? (wfsExpBillableDays * weightUnits100 * 99) : 0;
+            document.getElementById('row_wfs_exp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('wfs_exp_storage_sub').innerText = `${wfsExpBillableDays} debiterbara dag(ar) (99 kr/100kg/dag)`;
+
+            let wfsExpTotal = wfsExpThc + wfsExpHnd + wfsExpScr + wfsExpBat + wfsExpDg + wfsExpStorage;
+            document.getElementById('wfs_exp_thc').innerText = wfsExpThc.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_handling').innerText = wfsExpHnd.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_screening').innerText = wfsExpScr.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_battery').innerText = wfsExpBat.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_dg').innerText = wfsExpDg.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_storage').innerText = wfsExpStorage.toFixed(2) + ' SEK';
+            document.getElementById('wfs_exp_total').innerText = wfsExpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['wfs_exp'] = wfsExpTotal;
+
+            // -------------------------------------------------------------
+            // 2. WFS IMPORT (ARN)
+            // -------------------------------------------------------------
+            const wfsImpKg = parseFloat(document.getElementById('cfg_wfs_imp_hnd_kg').value) || 0;
+            const wfsImpMin = parseFloat(document.getElementById('cfg_wfs_imp_hnd_min').value) || 0;
+            const wfsImpMax = parseFloat(document.getElementById('cfg_wfs_imp_hnd_max').value) || 0;
+
+            let wfsImpHnd = 0;
+            if (weight > 0) {
+                wfsImpHnd = Math.max(weight * wfsImpKg, wfsImpMin);
+                if (wfsImpMax > 0) wfsImpHnd = Math.min(wfsImpHnd, wfsImpMax);
+            }
+
+            let wfsImpBillableDays = calculateWfsStorageDays('import');
+            let wfsImpStorage = isStorageChecked ? (wfsImpBillableDays * weightUnits100 * 99) : 0;
+            document.getElementById('row_wfs_imp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('wfs_imp_storage_sub').innerText = `${wfsImpBillableDays} debiterbara dag(ar) (99 kr/100kg/dag)`;
+
+            let wfsImpTotal = wfsImpHnd + wfsImpStorage;
+            document.getElementById('wfs_imp_handling').innerText = wfsImpHnd.toFixed(2) + ' SEK';
+            document.getElementById('wfs_imp_storage').innerText = wfsImpStorage.toFixed(2) + ' SEK';
+            document.getElementById('wfs_imp_total').innerText = wfsImpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['wfs_imp'] = wfsImpTotal;
+
+            // -------------------------------------------------------------
+            // 3. CARGO CENTER EXPORT (ARN)
+            // -------------------------------------------------------------
+            const ccHndKg = parseFloat(document.getElementById('cfg_cc_exp_hnd_kg').value) || 0;
+            const ccHndMin = parseFloat(document.getElementById('cfg_cc_exp_hnd_min').value) || 0;
+            const ccTermUnit = parseFloat(document.getElementById('cfg_cc_exp_term_unit').value) || 0;
+            const ccTermMin = parseFloat(document.getElementById('cfg_cc_exp_term_min').value) || 0;
+            const ccScrUnit = parseFloat(document.getElementById('cfg_cc_exp_scr_unit').value) || 0;
+
+            let ccExpHnd = weight > 0 ? Math.max(weight * ccHndKg, ccHndMin) : 0;
+            let ccExpTerm = weight > 0 ? Math.max(Math.ceil(weight / 100) * ccTermUnit, ccTermMin) : 0;
+            
+            let ccExpScr = 0;
+            if (pieces > 0) {
+                const units = Math.ceil(pieces / 10);
+                ccExpScr = units * ccScrUnit;
+                document.getElementById('cc_exp_screening_sub').innerText = `${units} enhet(er) à 10 pcs (${ccScrUnit} kr/st)`;
+            }
+
+            let ccExpDryIce = 0;
+            if (isDryIceChecked) {
+                ccExpDryIce = 430;
+                if (pieces > 5) ccExpDryIce += (pieces - 5) * 16;
+                document.getElementById('cc_exp_dryice_sub').innerText = pieces > 5 ? `430 kr + ${pieces - 5} st x 16 kr` : 'Inkl 5 kollin';
+            }
+            document.getElementById('row_cc_exp_dryice').style.display = isDryIceChecked ? '' : 'none';
+
+            // CC DG Check Export: 1600 kr + 325 per tillkommande UN-nr. Om > 10 kolli: +27 kr/kolli upp till 100 kolli
+            let ccExpDg = 0;
+            if (isDgChecked) {
+                ccExpDg = 1600 + ((unCount - 1) * 325);
+                let extraPcsFee = 0;
+                if (pieces > 10) {
+                    const billablePcs = Math.min(pieces, 100) - 10;
+                    extraPcsFee = billablePcs * 27;
+                    ccExpDg += extraPcsFee;
+                }
+                document.getElementById('cc_exp_dg_sub').innerText = `1600 kr (${unCount} UN-nr) ${pieces > 10 ? '+ ' + Math.min(pieces-10, 90) + ' kolli x 27kr' : ''}`;
+            }
+            document.getElementById('row_cc_exp_dg').style.display = isDgChecked ? '' : 'none';
+
+            let ccExpStorage = 0;
+            document.getElementById('row_cc_exp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('cc_exp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let ccExpTotal = ccExpHnd + ccExpTerm + ccExpScr + ccExpDryIce + ccExpDg + ccExpStorage;
+            document.getElementById('cc_exp_handling').innerText = ccExpHnd.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_terminal').innerText = ccExpTerm.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_screening').innerText = ccExpScr.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_dryice').innerText = ccExpDryIce.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_dg').innerText = ccExpDg.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_storage').innerText = ccExpStorage.toFixed(2) + ' SEK';
+            document.getElementById('cc_exp_total').innerText = ccExpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['cc_exp'] = ccExpTotal;
+
+            // -------------------------------------------------------------
+            // 4. CARGO CENTER IMPORT (ARN)
+            // -------------------------------------------------------------
+            const ccImpTermKg = parseFloat(document.getElementById('cfg_cc_imp_term_kg').value) || 0;
+            const ccImpTermMin = parseFloat(document.getElementById('cfg_cc_imp_term_min').value) || 0;
+            const ccImpTermMax = parseFloat(document.getElementById('cfg_cc_imp_term_max').value) || 0;
+            const ccImpHndKg = parseFloat(document.getElementById('cfg_cc_imp_hnd_kg').value) || 0;
+            const ccImpHndMin = parseFloat(document.getElementById('cfg_cc_imp_hnd_min').value) || 0;
+
+            let ccImpTerm = 0;
+            if (weight > 0) {
+                ccImpTerm = Math.max(weight * ccImpTermKg, ccImpTermMin);
+                if (ccImpTermMax > 0) ccImpTerm = Math.min(ccImpTerm, ccImpTermMax);
+            }
+
+            let ccImpHnd = weight > 0 ? Math.max(weight * ccImpHndKg, ccImpHndMin) : 0;
+            let ccImpStorage = 0;
+            document.getElementById('row_cc_imp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('cc_imp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let ccImpTotal = ccImpTerm + ccImpHnd + ccImpStorage;
+
+            document.getElementById('cc_imp_terminal').innerText = ccImpTerm.toFixed(2) + ' SEK';
+            document.getElementById('cc_imp_handling').innerText = ccImpHnd.toFixed(2) + ' SEK';
+            document.getElementById('cc_imp_storage').innerText = ccImpStorage.toFixed(2) + ' SEK';
+            document.getElementById('cc_imp_total').innerText = ccImpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['cc_imp'] = ccImpTotal;
+
+            // -------------------------------------------------------------
+            // 5. GLA EXPORT (GOT)
+            // -------------------------------------------------------------
+            const glaHndKg = parseFloat(document.getElementById('cfg_gla_exp_hnd_kg').value) || 0;
+            const glaHndMin = parseFloat(document.getElementById('cfg_gla_exp_hnd_min').value) || 0;
+            const glaTermKg = parseFloat(document.getElementById('cfg_gla_exp_term_kg').value) || 0;
+            const glaTermMin = parseFloat(document.getElementById('cfg_gla_exp_term_min').value) || 0;
+            const glaScrUnit = parseFloat(document.getElementById('cfg_gla_exp_scr_unit').value) || 0;
+            const glaBatVal = parseFloat(document.getElementById('cfg_gla_exp_battery').value) || 0;
+
+            let glaExpHnd = weight > 0 ? Math.max(weight * glaHndKg, glaHndMin) : 0;
+            let glaExpTerm = weight > 0 ? Math.max(weight * glaTermKg, glaTermMin) : 0;
+            
+            let glaExpScr = 0;
+            if (pieces > 0) {
+                const units = Math.ceil(pieces / 10);
+                glaExpScr = units * glaScrUnit;
+                document.getElementById('gla_exp_screening_sub').innerText = `${units} enhet(er) à 10 pcs (${glaScrUnit} kr/st)`;
+            }
+
+            let glaExpBat = isDryIceChecked ? glaBatVal : 0;
+            document.getElementById('row_gla_exp_battery').style.display = isDryIceChecked ? '' : 'none';
+
+            // GLA DG Check Export: 1425 upp till 20 kollin, därefter 685:- per påbörjat 20-tal
+            let glaExpDg = 0;
+            if (isDgChecked) {
+                glaExpDg = 1425;
+                if (pieces > 20) {
+                    const extraUnits20 = Math.ceil((pieces - 20) / 20);
+                    glaExpDg += extraUnits20 * 685;
+                    document.getElementById('gla_exp_dg_sub').innerText = `1425 kr (20 pcs) + ${extraUnits20}x 20-tal à 685 kr`;
+                } else {
+                    document.getElementById('gla_exp_dg_sub').innerText = `Upp till 20 kollin`;
+                }
+            }
+            document.getElementById('row_gla_exp_dg').style.display = isDgChecked ? '' : 'none';
+
+            let glaExpStorage = 0;
+            document.getElementById('row_gla_exp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('gla_exp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let glaExpTotal = glaExpHnd + glaExpTerm + glaExpScr + glaExpBat + glaExpDg + glaExpStorage;
+            document.getElementById('gla_exp_handling').innerText = glaExpHnd.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_terminal').innerText = glaExpTerm.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_screening').innerText = glaExpScr.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_battery').innerText = glaExpBat.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_dg').innerText = glaExpDg.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_storage').innerText = glaExpStorage.toFixed(2) + ' SEK';
+            document.getElementById('gla_exp_total').innerText = glaExpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['gla_exp'] = glaExpTotal;
+
+            // -------------------------------------------------------------
+            // 6. GLA IMPORT (GOT)
+            // -------------------------------------------------------------
+            const glaImpTermKg = parseFloat(document.getElementById('cfg_gla_imp_term_kg').value) || 0;
+            const glaImpTermMin = parseFloat(document.getElementById('cfg_gla_imp_term_min').value) || 0;
+            const glaImpTermMax = parseFloat(document.getElementById('cfg_gla_imp_term_max').value) || 0;
+            const glaImpHndKg = parseFloat(document.getElementById('cfg_gla_imp_hnd_kg').value) || 0;
+            const glaImpHndMin = parseFloat(document.getElementById('cfg_gla_imp_hnd_min').value) || 0;
+
+            let glaImpTerm = 0;
+            if (weight > 0) {
+                glaImpTerm = Math.max(weight * glaImpTermKg, glaImpTermMin);
+                if (glaImpTermMax > 0) glaImpTerm = Math.min(glaImpTerm, glaImpTermMax);
+            }
+
+            let glaImpHnd = weight > 0 ? Math.max(weight * glaImpHndKg, glaImpHndMin) : 0;
+            let glaImpStorage = 0;
+            document.getElementById('row_gla_imp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('gla_imp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let glaImpTotal = glaImpTerm + glaImpHnd + glaImpStorage;
+
+            document.getElementById('gla_imp_terminal').innerText = glaImpTerm.toFixed(2) + ' SEK';
+            document.getElementById('gla_imp_handling').innerText = glaImpHnd.toFixed(2) + ' SEK';
+            document.getElementById('gla_imp_storage').innerText = glaImpStorage.toFixed(2) + ' SEK';
+            document.getElementById('gla_imp_total').innerText = glaImpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['gla_imp'] = glaImpTotal;
+
+            // -------------------------------------------------------------
+            // 7. MENZIES EXPORT (MMX)
+            // -------------------------------------------------------------
+            const menzHndKg = parseFloat(document.getElementById('cfg_menzies_exp_hnd_kg').value) || 0;
+            const menzHndMin = parseFloat(document.getElementById('cfg_menzies_exp_hnd_min').value) || 0;
+            const menzScrUnit = parseFloat(document.getElementById('cfg_menzies_exp_scr_unit').value) || 0;
+            const menzDryIceCost = parseFloat(document.getElementById('cfg_menzies_exp_dryice').value) || 0;
+
+            let menzExpHnd = weight > 0 ? Math.max(weight * menzHndKg, menzHndMin) : 0;
+
+            let menzExpScr = 0;
+            if (pieces > 0) {
+                const units = Math.ceil(pieces / 10);
+                menzExpScr = units * menzScrUnit;
+                document.getElementById('menzies_exp_screening_sub').innerText = `${units} tiotal (${menzScrUnit} kr/st), per tiotal, maxvikt 3000kg`;
+            }
+
+            let menzExpDryIce = isDryIceChecked ? menzDryIceCost : 0;
+            document.getElementById('row_menzies_exp_dryice').style.display = isDryIceChecked ? '' : 'none';
+
+            // Menzies Export DG Check: 950 kr per UN-nr (inkl 10 kollin) + 400 kr per extra tiotal/UN
+            let menzExpDg = 0;
+            if (isDgChecked) {
+                let baseCost = unCount * 950;
+                let extraTenPcs = pieces > 10 ? Math.ceil((pieces - 10) / 10) : 0;
+                menzExpDg = baseCost + (extraTenPcs * 400);
+                document.getElementById('menzies_exp_dg_sub').innerText = `${unCount} st UN-nr (${baseCost} kr) ${extraTenPcs > 0 ? '+ ' + extraTenPcs + 'x extra tiotal (400kr)' : ''}`;
+            }
+            document.getElementById('row_menzies_exp_dg').style.display = isDgChecked ? '' : 'none';
+
+            let menzExpStorage = 0;
+            document.getElementById('row_menzies_exp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('menzies_exp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let menzExpTotal = menzExpHnd + menzExpScr + menzExpDryIce + menzExpDg + menzExpStorage;
+            document.getElementById('menzies_exp_handling').innerText = menzExpHnd.toFixed(2) + ' SEK';
+            document.getElementById('menzies_exp_screening').innerText = menzExpScr.toFixed(2) + ' SEK';
+            document.getElementById('menzies_exp_dryice').innerText = menzExpDryIce.toFixed(2) + ' SEK';
+            document.getElementById('menzies_exp_dg').innerText = menzExpDg.toFixed(2) + ' SEK';
+            document.getElementById('menzies_exp_storage').innerText = menzExpStorage.toFixed(2) + ' SEK';
+            document.getElementById('menzies_exp_total').innerText = menzExpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['menzies_exp'] = menzExpTotal;
+
+            // -------------------------------------------------------------
+            // 8. MENZIES IMPORT (MMX)
+            // -------------------------------------------------------------
+            const menzImpKg = parseFloat(document.getElementById('cfg_menzies_imp_hnd_kg').value) || 0;
+            const menzImpMin = parseFloat(document.getElementById('cfg_menzies_imp_hnd_min').value) || 0;
+
+            let menzImpHnd = weight > 0 ? Math.max(weight * menzImpKg, menzImpMin) : 0;
+            let menzImpStorage = 0;
+            document.getElementById('row_menzies_imp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('menzies_imp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let menzImpTotal = menzImpHnd + menzImpStorage;
+            document.getElementById('menzies_imp_handling').innerText = menzImpHnd.toFixed(2) + ' SEK';
+            document.getElementById('menzies_imp_storage').innerText = menzImpStorage.toFixed(2) + ' SEK';
+            document.getElementById('menzies_imp_total').innerText = menzImpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['menzies_imp'] = menzImpTotal;
+
+            // -------------------------------------------------------------
+            // 9. MFT EXPORT (MMX)
+            // -------------------------------------------------------------
+            const mftUtlastKg = parseFloat(document.getElementById('cfg_mft_exp_utlast_kg').value) || 0;
+            const mftUtlastMin = parseFloat(document.getElementById('cfg_mft_exp_utlast_min').value) || 0;
+            const mftScrBase = parseFloat(document.getElementById('cfg_mft_exp_scr_base').value) || 0;
+            const mftScrExtra = parseFloat(document.getElementById('cfg_mft_exp_scr_extra').value) || 0;
+
+            let mftExpHnd = 0;
+            if (weight > 0) {
+                if (weight <= 100) {
+                    mftExpHnd = 74;
+                    document.getElementById('mft_exp_hnd_sub').innerText = '01 - 100 kg (Min 74 SEK)';
+                } else if (weight <= 5000) {
+                    mftExpHnd = 74 + (weight * 0.35);
+                    document.getElementById('mft_exp_hnd_sub').innerText = '101 - 5000 kg (74 SEK + 0.35 SEK/kg)';
+                } else {
+                    mftExpHnd = 1789 + ((weight - 5000) * 0.19);
+                    document.getElementById('mft_exp_hnd_sub').innerText = '> 5000 kg (1789 SEK + 0.19 SEK/kg på utöver 5000kg)';
+                }
+            }
+
+            let mftExpUtlast = weight > 0 ? Math.max(weight * mftUtlastKg, mftUtlastMin) : 0;
+
+            let mftExpScr = 0;
+            if (pieces > 0) {
+                if (pieces <= 15) {
+                    mftExpScr = mftScrBase;
+                    document.getElementById('mft_exp_screening_sub').innerText = 'per HAWB, 1 -15 kollin, max 140*175 cm';
+                } else {
+                    const extraUnits = Math.ceil((pieces - 15) / 15);
+                    mftExpScr = mftScrBase + (extraUnits * mftScrExtra);
+                    document.getElementById('mft_exp_screening_sub').innerText = `1-15 kollin (${mftScrBase} kr) + ${extraUnits} st 15-tal à ${mftScrExtra} kr`;
+                }
+            }
+
+            let mftExpDryIce = isDryIceChecked ? 500 : 0;
+            document.getElementById('row_mft_exp_dryice').style.display = isDryIceChecked ? '' : 'none';
+
+            // MFT DG Check Export: 1360 kr upp till 20 kollin + 620 kr per efterföljande 20 kollin
+            let mftExpDg = 0;
+            if (isDgChecked) {
+                mftExpDg = 1360;
+                if (pieces > 20) {
+                    const extraUnits20 = Math.ceil((pieces - 20) / 20);
+                    mftExpDg += extraUnits20 * 620;
+                    document.getElementById('mft_exp_dg_sub').innerText = `1360 kr (20 pcs) + ${extraUnits20}x 20-tal à 620 kr`;
+                } else {
+                    document.getElementById('mft_exp_dg_sub').innerText = `Upp till 20 kollin`;
+                }
+            }
+            document.getElementById('row_mft_exp_dg').style.display = isDgChecked ? '' : 'none';
+
+            let mftExpStorage = 0;
+            document.getElementById('row_mft_exp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('mft_exp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let mftExpTotal = mftExpHnd + mftExpUtlast + mftExpScr + mftExpDryIce + mftExpDg + mftExpStorage;
+            document.getElementById('mft_exp_handling').innerText = mftExpHnd.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_utlast').innerText = mftExpUtlast.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_screening').innerText = mftExpScr.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_dryice').innerText = mftExpDryIce.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_dg').innerText = mftExpDg.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_storage').innerText = mftExpStorage.toFixed(2) + ' SEK';
+            document.getElementById('mft_exp_total').innerText = mftExpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['mft_exp'] = mftExpTotal;
+
+            // -------------------------------------------------------------
+            // 10. MFT IMPORT (MMX)
+            // -------------------------------------------------------------
+            const mftImpHndKg = parseFloat(document.getElementById('cfg_mft_imp_hnd_kg').value) || 0;
+            const mftImpHndMin = parseFloat(document.getElementById('cfg_mft_imp_hnd_min').value) || 0;
+
+            let mftImpTerm = 0;
+            if (weight > 0) {
+                if (weight <= 100) {
+                    mftImpTerm = 82;
+                    document.getElementById('mft_imp_term_sub').innerText = '1 - 100 kg (Min 82 SEK)';
+                } else if (weight <= 10000) {
+                    const units = Math.ceil(weight / 100);
+                    mftImpTerm = 82 + (units * 82);
+                    document.getElementById('mft_imp_term_sub').innerText = `101 - 10 000 kg (82 SEK bas + ${units} st 100-tal à 82 SEK)`;
+                } else {
+                    const extraUnits = Math.ceil((weight - 10000) / 100);
+                    mftImpTerm = 8200 + (extraUnits * 40);
+                    document.getElementById('mft_imp_term_sub').innerText = `> 10 000 kg (8200 SEK + ${extraUnits} st 100-tal à 40 SEK utöver 10t kg)`;
+                }
+            }
+
+            let mftImpHnd = weight > 0 ? Math.max(weight * mftImpHndKg, mftImpHndMin) : 0;
+            let mftImpStorage = 0;
+            document.getElementById('row_mft_imp_storage').style.display = isStorageChecked ? '' : 'none';
+            document.getElementById('mft_imp_storage_sub').innerText = `${daysStored} dagars lagring`;
+
+            let mftImpTotal = mftImpTerm + mftImpHnd + mftImpStorage;
+
+            document.getElementById('mft_imp_terminal').innerText = mftImpTerm.toFixed(2) + ' SEK';
+            document.getElementById('mft_imp_handling').innerText = mftImpHnd.toFixed(2) + ' SEK';
+            document.getElementById('mft_imp_storage').innerText = mftImpStorage.toFixed(2) + ' SEK';
+            document.getElementById('mft_imp_total').innerText = mftImpTotal.toFixed(2) + ' SEK';
+            calculatedTotals['mft_imp'] = mftImpTotal;
+
+            applyFiltersAndSort();
+        }
+
+        initTheme();
+        calculateAll();
+        fetchUsdExchangeRate();
+    </script>
+</body>
+</html>
